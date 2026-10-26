@@ -230,8 +230,6 @@ details p{margin:8px 0 0 30px;font-size:.93rem}
 <main id="app" aria-live="polite"></main>
 <script>
 /* ---------- config ---------- */
-// Campus dropdown. Best practice: share one link per campus, e.g. https://<site>/?campus=CDU
-const CAMPUSES = ["Alard University","BEST","CDU","Chevella","Geeta University","MRV","SPIHER, Chennai","Sushant University"];
 const STORE_KEY = "niat-thinking-profile-v2";
 
 /* ---------- content ---------- */
@@ -301,8 +299,6 @@ const S = {step:0, info:{name:"",roll:"",campus:""}, likert:Array(8).fill(0), da
 let timerId = null;
 const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} };
 (function restore(){ try { const o = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (o && o.info) Object.assign(S, o); } catch(e){} })();
-const urlCampus = new URLSearchParams(location.search).get("campus");
-if (urlCampus && !S.info.campus) S.info.campus = urlCampus.trim();
 const app = document.getElementById("app");
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clamp = n => Math.max(0, Math.min(100, Math.round(n)));
@@ -335,7 +331,6 @@ function render(){
 
 function renderIntro(){
   S.testing = false;
-  const opts = [...new Set([...CAMPUSES, ...(S.info.campus && !CAMPUSES.includes(S.info.campus) ? [S.info.campus] : [])])];
   app.innerHTML = `
   <h1>Are you doing the thinking, or is AI?</h1>
   <p class="hero-sub">Eight quick rounds, about 17 minutes. At the end you get a personal report on how you think and how you really use AI.</p>
@@ -343,21 +338,15 @@ function renderIntro(){
   <p class="note">No marks. No ranking. Just you vs. autopilot.</p>
   <div class="field"><label for="name">Your name</label><input class="line" id="name" autocomplete="name" value="${esc(S.info.name)}"></div>
   <div class="field"><label for="roll">Roll number</label><input class="line" id="roll" autocomplete="off" autocapitalize="characters" value="${esc(S.info.roll)}"></div>
-  <div class="field"><label for="campus">Campus</label>
-    <select class="line" id="campus"><option value="">Choose your campus</option>${opts.map(c => `<option ${c===S.info.campus?"selected":""}>${esc(c)}</option>`).join("")}<option value="__other">Other</option></select>
-    <input class="line" id="campusOther" autocomplete="off" placeholder="Type your campus name" style="display:none;margin-top:10px"></div>
   <p class="small soft">Do it on your own, without AI or Google. Pasting is switched off, and leaving the page shows up on your report.</p>
   <div class="actions"><button class="btn wide" id="go" disabled>Start round 1</button></div>`;
-  const go = document.getElementById("go"), sel = document.getElementById("campus"), other = document.getElementById("campusOther");
+  const go = document.getElementById("go");
   const check = () => {
     S.info.name = document.getElementById("name").value.trim();
     S.info.roll = document.getElementById("roll").value.trim().toUpperCase();
-    other.style.display = sel.value === "__other" ? "block" : "none";
-    S.info.campus = sel.value === "__other" ? other.value.trim() : sel.value;
-    go.disabled = !(S.info.name && S.info.roll && S.info.campus);
+    go.disabled = !(S.info.name && S.info.roll);
   };
-  ["name","roll","campusOther"].forEach(i => document.getElementById(i).addEventListener("input", check));
-  sel.addEventListener("change", check); check();
+  ["name","roll"].forEach(i => document.getElementById(i).addEventListener("input", check)); check();
   go.onclick = () => { S.testing = true; S.startedAt = Date.now(); next(); };
 }
 
@@ -798,7 +787,7 @@ async function renderReport(){
   document.title = `Thinking Profile - ${S.info.name}`;
   app.innerHTML = `<div class="reveal report">
   <div class="print-bar no-print"><button class="btn" id="pdf">Save as PDF or print</button></div>
-  <p class="for">Thinking profile of <b>${esc(S.info.name)}</b>, ${esc(S.info.roll)}, ${esc(S.info.campus)}<br>${today}</p>
+  <p class="for">Thinking profile of <b>${esc(S.info.name)}</b>, ${esc(S.info.roll)}<br>${today}</p>
   <div class="profile">${prof.name}<svg viewBox="0 0 300 22" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C 60 4, 120 20, 180 10 S 270 6, 296 12"/></svg></div>
   <p class="lead">${prof.line}</p>
   ${S.tabs > 0 ? `<div class="warn">You left the test ${S.tabs} time${S.tabs>1?"s":""}. If you looked things up, these results show less about your own thinking.</div>` : ""}
@@ -841,7 +830,7 @@ async function renderReport(){
 
   S.done = true; persist();
   save({ minutes: Math.round((Date.now() - (S.startedAt || Date.now())) / 60000), name:S.info.name, roll:S.info.roll,
-    campus:S.info.campus.toUpperCase(), reliance:rel, said, thinking:think, skills,
+    reliance:rel, said, thinking:think, skills,
     dat:{kept:dat.kept, method:dat.method}, profile:prof.k,
     ai:{asks:b.asks, quickAsks:b.quickAsks, followedWrong:b.followed, droppedRight:b.droppedRight},
     know:{right:k.right, overconfident:k.overconf}, tabs:S.tabs, reflect:S.reflect.slice(0,500) });

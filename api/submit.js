@@ -6,12 +6,12 @@ const num = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, Math.round(Number
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-  if (!b.name || !b.roll || !b.campus) return res.status(400).json({ error: "name, roll and campus are required" });
+  if (!b.name || !b.roll) return res.status(400).json({ error: "name and roll are required" });
 
   const row = {
     name: String(b.name).slice(0, 80),
     roll: String(b.roll).toUpperCase().slice(0, 40),
-    campus: String(b.campus).toUpperCase().trim().slice(0, 80),
+    campus: String(b.campus || "MAIN").toUpperCase().trim().slice(0, 80),
     reliance: num(b.reliance), said: num(b.said), thinking: num(b.thinking),
     skills: { creativity: num(b.skills?.creativity), insight: num(b.skills?.insight), reading: num(b.skills?.reading), focus: num(b.skills?.focus), selfaware: num(b.skills?.selfaware), reasoning: num(b.skills?.reasoning) },
     know: { right: num(b.know?.right, 0, 5), overconfident: num(b.know?.overconfident, 0, 5) },

@@ -9,11 +9,10 @@ Student test: `index.html` · Admin results: `admin.html` · Results API: `api/`
 4. **Redeploy** once so steps 2–3 take effect.
 
 ## Share
-- One link per campus, so students don't pick the wrong one: `https://<your-site>/?campus=CDU`
-- Results: `https://<your-site>/admin.html` → enter the admin key → campus table + CSV of every student.
+- Share one link with students: `https://<your-site>/`
+- Results: `https://<your-site>/admin.html` → enter the admin key → results table + CSV of every student.
 
 ## Good to know
-- Campus dropdown list: edit `CAMPUSES` at the top of the script in `index.html`.
 - Each student's first attempt counts. Retakes are stored but ignored in the summary.
 - Students save their report with the “Save as PDF or print” button (3-page A4: profile, skills, 4-week plan with links and weekly tick boxes).
 - Progress is saved on the student's device, so a refresh or dropped connection doesn't lose their test.

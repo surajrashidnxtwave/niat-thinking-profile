@@ -221,15 +221,15 @@ function draw(total){
   <p class="soft">${ROWS.length} students${total > ROWS.length ? ` (${total - ROWS.length} retakes ignored; first attempt counts)` : ""}. Scores are averages out of 100.</p>
   <div class="actions" style="justify-content:flex-start"><button class="btn" id="csv">Download all students (CSV)</button><button class="btn ghost" id="ref">Refresh</button></div>
   <div class="sheet table-wrap"><table>
-    <thead><tr><th>Campus</th><th>Students</th><th>AI use (said)</th><th>AI use (did)</th><th>Followed wrong AI</th><th>Own thinking</th>
+    <thead><tr><th>Group</th><th>Students</th><th>AI use (said)</th><th>AI use (did)</th><th>Followed wrong AI</th><th>Own thinking</th>
     <th>Creativity</th><th>Connecting</th><th>Deep reading</th><th>Focus</th><th>Knowing what you know</th><th>Reasoning</th><th>Sure but wrong</th>${Object.values(PROFILES).map(p => `<th>${p}</th>`).join("")}<th>Left the page</th><th>Avg minutes</th></tr></thead>
-    <tbody>${Object.entries(groups).sort().map(([k,a]) => line(k,a)).join("")}${line("All campuses", ROWS, true)}</tbody></table></div>
+    <tbody>${Object.keys(groups).length > 1 ? Object.entries(groups).sort().map(([k,a]) => line(k,a)).join("") : ""}${line(Object.keys(groups).length > 1 ? "All campuses" : "All students", ROWS, true)}</tbody></table></div>
   <p class="small soft">“Followed wrong AI” = students who ended on at least one of AI’s 3 wrong answers. “Sure but wrong” = students who said “sure” about at least one wrong answer. “Left the page” = students who switched tabs or apps during the test; treat their scores with caution.</p>`;
   document.getElementById("ref").onclick = load;
   document.getElementById("csv").onclick = csv;
 }
 function csv(){
-  const cols = [["campus",r=>r.campus],["roll",r=>r.roll],["name",r=>r.name],["profile",r=>PROFILES[r.profile]],["ai_use_said",r=>r.said],["ai_use_did",r=>r.reliance],
+  const cols = [["roll",r=>r.roll],["name",r=>r.name],["profile",r=>PROFILES[r.profile]],["ai_use_said",r=>r.said],["ai_use_did",r=>r.reliance],
     ["own_thinking",r=>r.thinking],["creativity",r=>r.skills?.creativity],["connecting",r=>r.skills?.insight],["deep_reading",r=>r.skills?.reading],["focus",r=>r.skills?.focus],["knowing_what_you_know",r=>r.skills?.selfaware],["reasoning",r=>r.skills?.reasoning],["sure_but_wrong",r=>r.know?.overconfident],
     ["ai_asks",r=>r.ai?.asks],["ai_quick_asks",r=>r.ai?.quickAsks],["followed_wrong_ai",r=>r.ai?.followedWrong],["dropped_own_right",r=>r.ai?.droppedRight],
     ["words",r=>(r.dat?.kept||[]).join(" ")],["left_page_times",r=>r.tabs],["minutes",r=>r.minutes],["attempts",r=>r.attempts],["reflection",r=>r.reflect],["submitted_at",r=>new Date(r.at).toISOString()]];
