@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thinking Profile · NIAT</title>
+<meta name="description" content="A 17-minute check of how you think, and how you really use AI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F7FD; --surface:#FFFFFF; --ink:#18203A; --ink-soft:#56607F; --pen:#2343C8; --on-pen:#FFFFFF;
+  --margin:#E2474B; --rule:#DCE4F5; --fill:#E8EDFB; --good:#1C7F50; --bad:#C2363B;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --hand:"Kalam", "Comic Neue", "Segoe Print", cursive;
+  color-scheme: light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1330; --surface:#151B3D; --ink:#E9EDFB; --ink-soft:#A4AED0; --pen:#8EA3FF; --on-pen:#0E1330;
+    --margin:#FF6B6E; --rule:#1C2550; --fill:#1D2655; --good:#5FD39A; --bad:#FF7B7F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1330; --surface:#151B3D; --ink:#E9EDFB; --ink-soft:#A4AED0; --pen:#8EA3FF; --on-pen:#0E1330;
+  --margin:#FF6B6E; --rule:#1C2550; --fill:#1D2655; --good:#5FD39A; --bad:#FF7B7F; color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;color:var(--ink);font-family:var(--display);font-size:17px;line-height:1.55;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--rule) 1px, transparent 1px);background-size:100% 34px;background-position:0 12px}
+main{position:relative;max-width:640px;margin:0 auto;padding:22px 20px 64px 52px;min-height:100vh}
+main::before{content:"";position:absolute;left:34px;top:0;bottom:0;width:2px;background:var(--margin);opacity:.7}
+.margin-num{position:absolute;left:2px;width:30px;text-align:center;font-family:var(--hand);font-weight:700;color:var(--margin);font-size:1.6rem;line-height:1}
+
+h1{font-size:clamp(2.2rem,8vw,3.3rem);line-height:1.02;letter-spacing:-.025em;font-weight:800;margin:28px 0 16px;font-variation-settings:"opsz" 96}
+h2{font-size:1.75rem;line-height:1.1;letter-spacing:-.015em;font-weight:800;margin:6px 0 10px;font-variation-settings:"opsz" 72}
+h3{font-size:1.15rem;font-weight:700;margin:34px 0 10px}
+p{margin:0 0 12px;max-width:34em}
+.soft{color:var(--ink-soft)}
+.small{font-size:.9rem}
+.hand{font-family:var(--hand);color:var(--pen);font-size:1.25rem;line-height:1.3}
+a{color:var(--pen)}
+
+/* top bar */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.92rem;color:var(--ink-soft)}
+.clock{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);background:var(--surface);border:1.5px solid var(--rule);border-radius:999px;padding:3px 12px;min-width:64px;text-align:center}
+.clock:empty{visibility:hidden}
+.clock.low{color:var(--bad);border-color:var(--bad)}
+.track{height:3px;background:var(--rule);margin:10px 0 22px;border-radius:2px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--pen)}
+
+/* sheet = where answers happen */
+.sheet{background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;padding:18px;margin:16px 0}
+.sheet + .sheet{margin-top:12px}
+
+/* fields written on a line */
+.field{margin:18px 0}
+.field label{display:block;font-weight:700;font-size:.95rem;margin-bottom:2px}
+.line{width:100%;font:inherit;font-size:1.1rem;color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--ink-soft);border-radius:0;padding:8px 2px}
+.line:focus{outline:none;border-bottom-color:var(--pen);box-shadow:0 2px 0 0 var(--pen)}
+select.line{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);
+  background-position:calc(100% - 14px) 55%,calc(100% - 9px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+textarea.line{border:2px solid var(--rule);border-radius:10px;padding:10px 12px;min-height:110px;resize:vertical}
+textarea.line:focus{border-color:var(--pen);box-shadow:none}
+
+/* buttons */
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;font-size:1.02rem;cursor:pointer;border-radius:12px;padding:14px 22px;min-height:52px;
+  border:2px solid var(--pen);background:var(--pen);color:var(--on-pen);transition:transform 140ms var(--ease-out),opacity 140ms}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--pen)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn.wide{width:100%}
+:focus-visible{outline:3px solid var(--margin);outline-offset:2px}
+
+/* OMR bubbles */
+.opt{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:var(--ink);
+  background:transparent;border:0;border-bottom:1px solid var(--rule);padding:13px 2px;cursor:pointer}
+.opt:last-of-type{border-bottom:0}
+.bub{width:24px;height:24px;border-radius:50%;border:2px solid var(--ink-soft);display:grid;place-items:center;font-size:.72rem;font-weight:700;color:var(--ink-soft);transition:background 160ms var(--ease-out),border-color 160ms}
+.opt.on .bub{background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--pen) 70%,white) 0,var(--pen) 60%);border-color:var(--pen);color:var(--on-pen)}
+.opt.on{font-weight:700}
+.opt:disabled{cursor:default}
+
+.likert{padding:14px 0 16px;border-bottom:1px solid var(--rule)}
+.likert:last-child{border-bottom:0}
+.scale{display:flex;justify-content:space-between;max-width:330px;margin-top:10px}
+.scale button{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink-soft);background:transparent;color:var(--ink-soft);font:inherit;font-weight:700;cursor:pointer;
+  transition:background 160ms var(--ease-out),transform 120ms var(--ease-out)}
+.scale button:active{transform:scale(.92)}
+.scale button.on{background:var(--pen);border-color:var(--pen);color:var(--on-pen)}
+.ends{display:flex;justify-content:space-between;max-width:330px;font-family:var(--hand);color:var(--ink-soft);font-size:1rem;margin-top:4px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{font:inherit;font-size:.92rem;font-weight:700;cursor:pointer;border-radius:999px;padding:8px 14px;border:2px solid var(--rule);background:transparent;color:var(--ink)}
+.chip.on{border-color:var(--pen);background:var(--fill);color:var(--pen)}
+
+.words{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+.words .line{font-size:1.05rem}
+.words label{font-family:var(--hand);color:var(--ink-soft);font-size:.95rem;display:block;margin-top:6px}
+
+.cues{font-size:clamp(1.5rem,6vw,2rem);font-weight:800;letter-spacing:-.01em;text-align:center;margin:8px 0 18px;display:flex;justify-content:center;gap:.9em;flex-wrap:wrap}
+.answer{font-size:1.35rem;text-align:center}
+
+.passage{font-size:1.05rem;line-height:1.7}
+
+.sd-key{display:grid;grid-template-columns:repeat(9,1fr);border:1.5px solid var(--rule);border-radius:12px;overflow:hidden;text-align:center;background:var(--surface)}
+.sd-key div{padding:6px 0;border-right:1px solid var(--rule)}
+.sd-key div:last-child{border-right:0}
+.sd-key b{display:block;font-size:1.25rem;line-height:1.5}
+.sd-key span{font-family:var(--hand);color:var(--pen);font-size:1.1rem}
+.sd-symbol{font-size:5rem;text-align:center;margin:20px 0;line-height:1;height:5rem}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:330px;margin:0 auto}
+.pad button{min-height:60px;font:inherit;font-size:1.4rem;font-weight:700;border-radius:14px;border:2px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform 100ms var(--ease-out)}
+.pad button:active{transform:scale(.94);background:var(--fill)}
+.pad button:disabled{opacity:.4}
+.hit{color:var(--good)} .miss{color:var(--bad)}
+
+.ai{margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:var(--fill);border-left:4px solid var(--pen)}
+.ai .who{font-family:var(--hand);color:var(--pen);font-size:1.1rem;display:block;line-height:1.2;margin-bottom:2px}
+
+.note{font-family:var(--hand);color:var(--margin);font-size:1.2rem;line-height:1.3;margin:6px 0 16px}
+.warn{border:2px solid var(--bad);border-radius:12px;padding:12px 14px;margin:18px 0}
+
+/* intro */
+.hero-sub{font-size:1.15rem;color:var(--ink-soft);max-width:30em}
+.rounds{list-style:none;padding:0;margin:20px 0 6px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:.95rem}
+.rounds li{display:flex;gap:8px}
+.rounds li span{font-family:var(--hand);color:var(--margin);width:1.1em;flex:none}
+
+/* report */
+.for{font-size:.95rem;color:var(--ink-soft);margin-top:24px}
+.profile{position:relative;display:inline-block;font-family:var(--hand);font-weight:700;color:var(--pen);font-size:clamp(2.8rem,12vw,4.2rem);line-height:1.05;margin:6px 0 14px}
+.profile svg{position:absolute;left:-4px;right:-4px;bottom:-12px;width:calc(100% + 8px);height:22px;overflow:visible}
+.profile path{fill:none;stroke:var(--margin);stroke-width:4;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:0}
+.quad-wrap{background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;padding:8px 8px 14px;margin:18px 0}
+.quad{width:100%;max-width:400px;display:block;margin:0 auto}
+.dot{transform-box:fill-box;transform-origin:center}
+.meter-row{margin:14px 0}
+.meter-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
+.meter-top b{font-variant-numeric:tabular-nums;font-size:1.15rem}
+.meter{height:8px;background:var(--rule);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.meter i{display:block;height:100%;background:var(--pen);border-radius:4px}
+.meter.said i{background:var(--ink-soft)}
+.verdict{font-family:var(--hand);font-size:1.35rem;color:var(--pen);line-height:1.3;margin:14px 0 8px}
+.facts{margin:8px 0 0;padding-left:20px;font-size:.95rem}
+.facts li{margin:4px 0}
+.moves{list-style:none;padding:0;margin:0;counter-reset:m}
+.moves li{counter-increment:m;display:grid;grid-template-columns:34px 1fr;gap:6px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.moves li:last-child{border-bottom:0}
+.moves li::before{content:counter(m);font-family:var(--hand);font-weight:700;font-size:1.6rem;color:var(--margin);line-height:1}
+details{border-bottom:1px solid var(--rule);padding:10px 0}
+details:last-child{border-bottom:0}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary .mark{font-family:var(--hand);font-size:1.3rem;line-height:1;width:1em;flex:none}
+details p{margin:8px 0 0 30px;font-size:.93rem}
+.saved{font-size:.9rem;color:var(--ink-soft);margin-top:26px}
+
+
+/* report layout */
+.report .for{line-height:1.5}
+.lead{font-size:1.08rem}
+.snapshot{display:grid;gap:8px;align-items:start}
+.big{display:flex;gap:28px;margin:4px 0 6px}
+.big b{display:block;font-size:2.6rem;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big span{font-size:.88rem;color:var(--ink-soft)}
+.tag{font-style:normal;font-family:var(--hand);font-weight:400;color:var(--margin);font-size:1rem;margin-left:6px}
+.skills .meter-row{margin:10px 0}
+.plan-h{font-size:1.45rem;font-weight:800;margin-top:40px}
+.action{background:var(--surface);border:1.5px solid var(--rule);border-radius:14px;padding:18px 18px 14px;margin:16px 0}
+.action h4{display:flex;gap:10px;align-items:baseline;font-size:1.15rem;line-height:1.3;margin:0 0 8px}
+.action .n{font-family:var(--hand);font-weight:700;color:var(--margin);font-size:1.7rem;line-height:1;flex:none}
+.action p{margin:0 0 8px}
+.action .why{font-size:.95rem}
+.lbl{font-weight:700;font-size:.85rem;color:var(--ink-soft);margin:12px 0 4px !important}
+.steps{margin:0;padding-left:22px}
+.steps li{margin:5px 0}
+.where{margin:0;padding-left:20px}
+.where li{margin:4px 0;overflow-wrap:anywhere}
+.where a{font-weight:700}
+.pair{display:grid;gap:4px 18px}
+.weeks{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--rule);font-size:.88rem;color:var(--ink-soft)}
+.weeks span{display:flex;align-items:center;gap:6px}
+.weeks i{width:16px;height:16px;border:2px solid var(--ink-soft);border-radius:4px;display:inline-block}
+.print-bar{display:flex;justify-content:flex-end;margin-top:4px}
+.print-only{display:none}
+@media (min-width:640px){ .snapshot{grid-template-columns:1fr 1fr;gap:20px} .pair{grid-template-columns:1fr 1fr} }
+
+@page{size:A4;margin:14mm 14mm 16mm}
+@media print{
+  :root{--paper:#fff;--surface:#fff;--ink:#141a30;--ink-soft:#4f5878;--pen:#2343C8;--on-pen:#fff;--margin:#D63B40;--rule:#D9E0F0;--fill:#EEF2FC;color-scheme:light;padding:0}
+  body{background:#fff !important;font-size:11pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  main{max-width:none;padding:0 0 0 40px;min-height:0}
+  main::before{left:24px;opacity:.6}
+  .no-print,.print-bar,.warn+.no-print{display:none !important}
+  .print-only{display:block;margin-top:18px}
+  .profile{font-size:34pt;margin:2px 0 10px}
+  .profile path{stroke-dashoffset:0 !important;animation:none !important}
+  .dot{animation:none !important;opacity:1 !important}
+  .meter i{transition:none !important}
+  .snapshot{grid-template-columns:44% 1fr;gap:16px}
+  .quad-wrap{margin:6px 0;padding:4px}
+  .pair{grid-template-columns:1fr 1fr}
+  .action{break-inside:avoid;page-break-inside:avoid;border-color:#cfd7ea;padding:10px 14px 8px;margin:8px 0;font-size:9.5pt;line-height:1.4}
+  .action h4{font-size:11.5pt;margin-bottom:4px}
+  .steps li,.where li{margin:2px 0}
+  .lbl{margin:7px 0 2px !important}
+  .weeks{margin-top:8px;padding-top:8px}
+  h3{break-after:avoid;margin-top:20px}
+  .plan-h{break-before:page;margin-top:0}
+  a{color:var(--pen);text-decoration:none}
+}
+@media (prefers-reduced-motion: no-preference){
+  .track i,.meter i{transition:width 700ms var(--ease-out)}
+  .reveal .profile path{stroke-dashoffset:420;animation:draw 900ms 250ms var(--ease-out) forwards}
+  .reveal .dot{animation:land 520ms 500ms var(--ease-out) both}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes land{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:scale(1)}}
+}
+@media (min-width:700px){ main{padding-left:72px} main::before{left:50px} .margin-num{left:10px} }
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<script>
+/* ---------- config ---------- */
+// Campus dropdown. Best practice: share one link per campus, e.g. https://<site>/?campus=CDU
+const CAMPUSES = ["Alard University","BEST","CDU","Chevella","Geeta University","MRV","SPIHER, Chennai","Sushant University"];
+const STORE_KEY = "niat-thinking-profile-v2";
+
+/* ---------- content ---------- */
+const LIKERT = [
+  {t:"When I get an assignment, I open AI before trying it myself.", r:false},
+  {t:"I try a problem on my own for at least 10 minutes before asking AI.", r:true},
+  {t:"I submit AI-generated work without fully understanding it.", r:false},
+  {t:"I can explain every line of code that AI writes for me.", r:true},
+  {t:"I check AI answers by testing them or comparing with another source.", r:true},
+  {t:"I feel stuck when AI tools aren’t available.", r:false},
+  {t:"I use AI to write messages I could easily write myself.", r:false},
+  {t:"I use AI to explain a concept, then practise it on my own.", r:true}
+];
+const RAT = [
+  {c:["cream","skate","water"], a:["ice"]},
+  {c:["falling","actor","dust"], a:["star"]},
+  {c:["night","wrist","stop"], a:["watch"]},
+  {c:["river","note","account"], a:["bank"]},
+  {c:["tooth","copy","cut"], a:["paste"]}
+];
+const PASSAGE = `Around the year 2000, scientists at University College London scanned the brains of London taxi drivers. To get a licence, these drivers spend years memorising about 25,000 streets, a test known as “The Knowledge”. The scans showed that the back part of their hippocampus, a brain region linked to spatial memory, was larger than in people who didn’t drive taxis. The longer someone had been a cabbie, the bigger the difference.
+
+A later study compared taxi drivers with London bus drivers. Bus drivers spend just as many hours in traffic, but they follow the same fixed routes every day. Their hippocampus showed no such difference. The researchers’ conclusion: it wasn’t driving that changed the brain. It was the daily work of figuring out the way.`;
+const READ_Q = [
+  {q:"Why did the researchers also study bus drivers?",
+   o:["To check whether the change came from driving itself or from finding the way","Because bus drivers drive more hours than taxi drivers","To test whether bigger vehicles affect the brain","Because taxi drivers refused more scans"], a:0},
+  {q:"Which finding suggests the change built up over time?",
+   o:["Bus drivers showed no difference","Drivers with more years on the job showed a bigger difference","The Knowledge covers about 25,000 streets","The hippocampus is linked to spatial memory"], a:1},
+  {q:"Based on the passage, what would most likely happen to someone who uses Google Maps for every trip?",
+   o:["Their hippocampus would grow faster","Nothing, because the study was only about taxis","They’d miss the brain workout that comes from finding the way","They would become better drivers"], a:2}
+];
+const KNOW = [
+  {q:"Which is bigger?", o:["2<sup>10</sup>","10<sup>3</sup>","They’re equal"], a:0},
+  {q:"Which state is the largest by area?", o:["Andhra Pradesh","Karnataka","Telangana","Tamil Nadu"], a:1},
+  {q:"What is the capital of Australia?", o:["Sydney","Melbourne","Canberra","Perth"], a:2},
+  {q:"Can you see the Great Wall of China from the Moon with your naked eye?", o:["Yes","No"], a:1},
+  {q:"Where does sound travel faster?", o:["Water","Air","Same speed in both"], a:0}
+];
+const CONF = [{k:"guess", t:"Guessing", p:.5},{k:"think", t:"Think so", p:.75},{k:"sure", t:"Sure", p:.95}];
+const PUZ = [
+  {q:"A bat and a ball cost ₹110 together. The bat costs ₹100 more than the ball. How much is the ball?",
+   o:["₹10","₹5","₹1","₹55"], a:1, ai:0, aiWhy:"₹110 − ₹100 = ₹10, so the ball costs ₹10.",
+   why:"If the ball is ₹5, the bat is ₹105, and together they make ₹110. ₹10 is the answer that feels right at first."},
+  {q:"5 machines make 5 bottles in 5 minutes. How long do 100 machines take to make 100 bottles?",
+   o:["100 minutes","20 minutes","5 minutes","1 minute"], a:2, ai:2, aiWhy:"Each machine makes 1 bottle in 5 minutes, so 100 machines make 100 bottles in 5 minutes.",
+   why:"Each machine takes 5 minutes per bottle, however many machines work side by side."},
+  {q:"A patch of weeds doubles in size every day. It covers the whole lake on day 48. On which day did it cover half the lake?",
+   o:["Day 24","Day 47","Day 46","Day 12"], a:1, ai:0, aiWhy:"Half of 48 is 24, so it covered half the lake on day 24.",
+   why:"It doubles every day, so the day before it covered the whole lake, it covered half: day 47."},
+  {q:"Karthik has 3 sisters. Each sister has exactly 1 brother. How many boys are in the family?",
+   o:["1","3","4","0"], a:0, ai:0, aiWhy:"Every sister’s one brother is Karthik himself, so there is 1 boy.",
+   why:"All three sisters share the same brother: Karthik."},
+  {q:"Roughly how many seconds are there in one day?",
+   o:["About 1,440","About 8,600","About 86,400","About 8,64,000"], a:2, ai:0, aiWhy:"24 hours × 60 = 1,440, so about 1,440 seconds.",
+   why:"24 × 60 × 60 = 86,400. 1,440 is the number of minutes, not seconds."},
+  {q:"What comes next: 2, 6, 12, 20, 30, ?",
+   o:["40","42","44","36"], a:1, ai:1, aiWhy:"The gaps grow by 2 (4, 6, 8, 10), so the next gap is 12: 30 + 12 = 42.",
+   why:"The gaps are 4, 6, 8, 10, so the next is 12, giving 42."}
+];
+const SYMBOLS = ["◆","▲","●","■","✚","★","◐","⬟","✕"];
+const STEPS = ["About you","Confession round","Word spread","Missing link","Deep read","Speed match","Know what you know","You or AI?","One question"];
+
+/* ---------- state ---------- */
+const S = {step:0, info:{name:"",roll:"",campus:""}, likert:Array(8).fill(0), dat:Array(10).fill(""),
+  rat:[], read:Array(3).fill(-1), readPhase:0, sd:{correct:0,wrong:0},
+  know:KNOW.map(() => ({pick:-1, conf:null})), ai:[], reflect:"", tabs:0, testing:false};
+let timerId = null;
+const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} };
+(function restore(){ try { const o = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (o && o.info) Object.assign(S, o); } catch(e){} })();
+const urlCampus = new URLSearchParams(location.search).get("campus");
+if (urlCampus && !S.info.campus) S.info.campus = urlCampus.trim();
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp = n => Math.max(0, Math.min(100, Math.round(n)));
+
+document.addEventListener("visibilitychange", () => { if (document.hidden && S.testing){ S.tabs++; persist(); } });
+document.addEventListener("paste", e => { if (S.testing) e.preventDefault(); });
+
+function topBar(){
+  const pct = Math.round((S.step - 1) / (STEPS.length - 1) * 100);
+  return `<div class="margin-num" aria-hidden="true" style="top:26px">${S.step}</div>
+  <div class="top"><span>Round ${S.step} of ${STEPS.length - 1}</span><span class="clock" id="clock" role="timer"></span></div>
+  <div class="track"><i style="width:${pct}%"></i></div>`;
+}
+function startTimer(sec, onEnd){
+  clearInterval(timerId);
+  let left = sec;
+  const draw = () => { const el = document.getElementById("clock"); if (!el) return;
+    el.textContent = `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`; el.classList.toggle("low", left <= 10); };
+  draw();
+  timerId = setInterval(() => { left--; draw(); if (left <= 0){ clearInterval(timerId); onEnd(); } }, 1000);
+}
+function next(){ clearInterval(timerId); S.step++; persist(); render(); window.scrollTo(0,0); }
+const optRow = (html, on, attrs) => `<button class="opt ${on?"on":""}" ${attrs}><span class="bub" aria-hidden="true"></span><span>${html}</span></button>`;
+
+/* ---------- screens ---------- */
+function render(){
+  if (S.step === 5 && (S.sd.correct || S.sd.wrong) && !S.done) S.sd = {correct:0, wrong:0};
+  [renderIntro, renderLikert, renderDAT, renderRAT, renderRead, renderSD, renderKnow, renderAI, renderReflect, renderReport][S.step]();
+}
+
+function renderIntro(){
+  S.testing = false;
+  const opts = [...new Set([...CAMPUSES, ...(S.info.campus && !CAMPUSES.includes(S.info.campus) ? [S.info.campus] : [])])];
+  app.innerHTML = `
+  <h1>Are you doing the thinking, or is AI?</h1>
+  <p class="hero-sub">Eight quick rounds, about 17 minutes. At the end you get a personal report on how you think and how you really use AI.</p>
+  <ol class="rounds">${STEPS.slice(1).map((s,i) => `<li><span>${i+1}</span>${s}</li>`).join("")}</ol>
+  <p class="note">No marks. No ranking. Just you vs. autopilot.</p>
+  <div class="field"><label for="name">Your name</label><input class="line" id="name" autocomplete="name" value="${esc(S.info.name)}"></div>
+  <div class="field"><label for="roll">Roll number</label><input class="line" id="roll" autocomplete="off" autocapitalize="characters" value="${esc(S.info.roll)}"></div>
+  <div class="field"><label for="campus">Campus</label>
+    <select class="line" id="campus"><option value="">Choose your campus</option>${opts.map(c => `<option ${c===S.info.campus?"selected":""}>${esc(c)}</option>`).join("")}<option value="__other">Other</option></select>
+    <input class="line" id="campusOther" autocomplete="off" placeholder="Type your campus name" style="display:none;margin-top:10px"></div>
+  <p class="small soft">Do it on your own, without AI or Google. Pasting is switched off, and leaving the page shows up on your report.</p>
+  <div class="actions"><button class="btn wide" id="go" disabled>Start round 1</button></div>`;
+  const go = document.getElementById("go"), sel = document.getElementById("campus"), other = document.getElementById("campusOther");
+  const check = () => {
+    S.info.name = document.getElementById("name").value.trim();
+    S.info.roll = document.getElementById("roll").value.trim().toUpperCase();
+    other.style.display = sel.value === "__other" ? "block" : "none";
+    S.info.campus = sel.value === "__other" ? other.value.trim() : sel.value;
+    go.disabled = !(S.info.name && S.info.roll && S.info.campus);
+  };
+  ["name","roll","campusOther"].forEach(i => document.getElementById(i).addEventListener("input", check));
+  sel.addEventListener("change", check); check();
+  go.onclick = () => { S.testing = true; S.startedAt = Date.now(); next(); };
+}
+
+function renderLikert(){
+  app.innerHTML = topBar() + `
+  <h2>Confession round</h2>
+  <p>Relax, this round isn’t scored. No marks, no judgement, and nobody is checking your answers.</p>
+  <p class="soft">Think of it as a mirror. Be brutally honest: the only person you can fool here is you. At the end, you’ll find out how well you really know yourself.</p>
+  <div class="sheet">${LIKERT.map((q,i) => `
+    <div class="likert"><div>${q.t}</div>
+      <div class="scale" role="radiogroup" aria-label="${esc(q.t)}">${[1,2,3,4,5].map(v => `<button data-q="${i}" data-v="${v}" class="${S.likert[i]===v?"on":""}" aria-label="${v} of 5">${v}</button>`).join("")}</div>
+      <div class="ends"><span>nope, not me</span><span>that’s so me</span></div></div>`).join("")}
+  </div><div class="actions"><button class="btn" id="go" disabled>Next round</button></div>`;
+  const go = document.getElementById("go");
+  const upd = () => go.disabled = S.likert.includes(0);
+  app.querySelectorAll(".scale button").forEach(b => b.onclick = () => {
+    S.likert[+b.dataset.q] = +b.dataset.v;
+    b.parentNode.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); upd(); });
+  upd(); go.onclick = next;
+}
+
+function renderDAT(){
+  app.innerHTML = topBar() + `
+  <h2>Word spread</h2>
+  <p>Write 10 words that are as different from each other as possible, in meaning and in how they’re used.</p>
+  <p class="soft small">Single English nouns only, like “mango”, “volcano” or “pillow”. No names of people or places, no technical words.</p>
+  <div class="sheet words">${S.dat.map((w,i) => `<div><label for="w${i}">${i+1}.</label><input class="line" id="w${i}" data-i="${i}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(w)}"></div>`).join("")}</div>
+  <div class="actions"><button class="btn" id="go">Next round</button></div>`;
+  app.querySelectorAll(".words input").forEach(inp => inp.oninput = () => { S.dat[+inp.dataset.i] = inp.value.trim(); });
+  document.getElementById("go").onclick = () => { persist(); next(); };
+  startTimer(180, () => { persist(); next(); });
+}
+
+function renderRAT(){
+  const i = S.rat.length;
+  if (i >= RAT.length) return next();
+  const it = RAT[i];
+  app.innerHTML = topBar() + `
+  <h2>Missing link</h2>
+  <p>Find one word that goes with all three. <span class="soft">Example: foot, basket, volley → ball.</span></p>
+  <p class="soft small">Puzzle ${i+1} of ${RAT.length}. 30 seconds each.</p>
+  <div class="sheet"><div class="cues">${it.c.map(c => `<span>${c}</span>`).join("")}</div>
+    <input class="line answer" id="ans" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Your answer" placeholder="your word"></div>
+  <div class="actions"><button class="btn ghost" id="skip">Skip</button><button class="btn" id="go">Submit</button></div>`;
+  const ans = document.getElementById("ans"); ans.focus();
+  const submit = () => {
+    clearInterval(timerId);
+    const v = ans.value.trim().toLowerCase();
+    S.rat.push(it.a.includes(v) || it.a.includes(v.replace(/s$/,"")) ? 1 : 0);
+    persist(); renderRAT();
+  };
+  document.getElementById("go").onclick = submit;
+  document.getElementById("skip").onclick = () => { ans.value = ""; submit(); };
+  ans.onkeydown = e => { if (e.key === "Enter") submit(); };
+  startTimer(30, submit);
+}
+
+function renderRead(){
+  if (S.readPhase === 0){
+    app.innerHTML = topBar() + `
+    <h2>Deep read</h2>
+    <p class="soft">Read this once, carefully. You get 75 seconds, and you can’t come back to it.</p>
+    <div class="sheet passage">${PASSAGE.split("\n\n").map(p => `<p>${p}</p>`).join("")}</div>
+    <div class="actions"><button class="btn" id="go">I’ve read it</button></div>`;
+    const done = () => { clearInterval(timerId); S.readPhase = 1; persist(); renderRead(); window.scrollTo(0,0); };
+    document.getElementById("go").onclick = done;
+    startTimer(75, done);
+    return;
+  }
+  app.innerHTML = topBar() + `
+  <h2>Deep read</h2>
+  <p class="soft">Answer from what you read. 60 seconds.</p>
+  ${READ_Q.map((r,i) => `<div class="sheet"><p><b>${i+1}. ${r.q}</b></p>${r.o.map((o,j) => optRow(o, S.read[i]===j, `data-i="${i}" data-j="${j}"`)).join("")}</div>`).join("")}
+  <div class="actions"><button class="btn" id="go">Next round</button></div>`;
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    S.read[+b.dataset.i] = +b.dataset.j;
+    b.parentNode.querySelectorAll(".opt").forEach(x => x.classList.toggle("on", x === b)); });
+  document.getElementById("go").onclick = next;
+  startTimer(60, next);
+}
+
+function renderSD(){
+  app.innerHTML = topBar() + `
+  <h2>Speed match</h2>
+  <p>Each symbol has a number. When a symbol appears, tap its number. Fast, but without mistakes. 60 seconds.</p>
+  <div class="sd-key">${SYMBOLS.map((s,i) => `<div><b>${s}</b><span>${i+1}</span></div>`).join("")}</div>
+  <div class="sd-symbol" id="sym" aria-live="off"></div>
+  <div class="pad" id="pad">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-n="${n}" disabled>${n}</button>`).join("")}</div>
+  <div class="actions"><button class="btn wide" id="go">Start the 60 seconds</button></div>`;
+  const sym = document.getElementById("sym"), btns = app.querySelectorAll("#pad button"), go = document.getElementById("go");
+  let cur = -1;
+  const pick = () => { let n; do { n = Math.floor(Math.random()*9); } while (n === cur); cur = n; sym.textContent = SYMBOLS[n]; sym.className = "sd-symbol"; };
+  btns.forEach(b => b.onclick = () => {
+    const ok = +b.dataset.n === cur + 1;
+    ok ? S.sd.correct++ : S.sd.wrong++;
+    pick(); sym.classList.add(ok ? "hit" : "miss");
+  });
+  go.onclick = () => {
+    go.style.display = "none";
+    btns.forEach(b => b.disabled = false); pick();
+    startTimer(60, () => { btns.forEach(b => b.disabled = true); next(); });
+  };
+}
+
+function renderKnow(){
+  app.innerHTML = topBar() + `
+  <h2>Know what you know</h2>
+  <p>Answer each one, then say how sure you are. Being honest about “Guessing” counts as much as being right.</p>
+  ${KNOW.map((k,i) => `<div class="sheet"><p><b>${i+1}. ${k.q}</b></p>
+    ${k.o.map((o,j) => optRow(o, S.know[i].pick===j, `data-i="${i}" data-j="${j}"`)).join("")}
+    <div class="chips" role="radiogroup" aria-label="How sure are you?">${CONF.map(c => `<button class="chip ${S.know[i].conf===c.k?"on":""}" data-i="${i}" data-c="${c.k}">${c.t}</button>`).join("")}</div></div>`).join("")}
+  <div class="actions"><button class="btn" id="go" disabled>Next round</button></div>`;
+  const go = document.getElementById("go");
+  const upd = () => go.disabled = !S.know.every(k => k.pick >= 0 && k.conf);
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    S.know[+b.dataset.i].pick = +b.dataset.j;
+    b.parentNode.querySelectorAll(".opt").forEach(x => x.classList.toggle("on", x === b)); upd(); });
+  app.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    S.know[+b.dataset.i].conf = b.dataset.c;
+    b.parentNode.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b)); upd(); });
+  upd(); go.onclick = next;
+  startTimer(90, next);
+}
+
+function renderAI(){
+  const i = S.ai.length;
+  if (i >= PUZ.length) return next();
+  const p = PUZ[i], rec = {asked:false, askAt:null, own:null, final:null, switched:false};
+  let pick = -1; const t0 = Date.now();
+  app.innerHTML = topBar() + `
+  <h2>You or AI?</h2>
+  <p class="soft small">Puzzle ${i+1} of ${PUZ.length}. Solve it yourself, or ask AI. Each correct answer earns 2 points; asking AI costs 1.</p>
+  <div class="sheet"><p><b>${p.q}</b></p>
+    ${p.o.map((o,j) => optRow(o, false, `data-j="${j}"`)).join("")}
+    <div id="aibox"></div></div>
+  <div class="actions"><button class="btn ghost" id="ask">Ask AI (−1 point)</button><button class="btn" id="lock" disabled>Lock in</button></div>`;
+  const opts = app.querySelectorAll(".opt"), lock = document.getElementById("lock"), ask = document.getElementById("ask");
+  opts.forEach(b => b.onclick = () => { pick = +b.dataset.j; opts.forEach(x => x.classList.toggle("on", x === b)); lock.disabled = false; });
+  ask.onclick = () => {
+    rec.asked = true; rec.askAt = Math.round((Date.now() - t0) / 1000); ask.disabled = true;
+    document.getElementById("aibox").innerHTML = `<div class="ai"><span class="who">AI says</span>${p.aiWhy} <b>Answer: ${p.o[p.ai]}</b></div>`;
+  };
+  const done = () => {
+    clearInterval(timerId);
+    if (rec.asked){ rec.final = pick < 0 ? null : pick; S.ai.push(rec); persist(); return renderAI(); }
+    if (pick < 0){ S.ai.push(rec); persist(); return renderAI(); }
+    rec.own = pick; reveal(p, rec);
+  };
+  lock.onclick = done;
+  startTimer(45, done);
+}
+function reveal(p, rec){
+  const agree = rec.own === p.ai;
+  app.innerHTML = topBar() + `
+  <h2>You or AI?</h2>
+  <div class="sheet"><p><b>${p.q}</b></p>
+    <p>You picked <b>${p.o[rec.own]}</b>.</p>
+    <div class="ai"><span class="who">AI says</span>${p.aiWhy} <b>Answer: ${p.o[p.ai]}</b></div></div>
+  <p class="hand">${agree ? "AI agrees with you." : "AI disagrees. Whose answer do you trust?"}</p>
+  <div class="actions">${agree ? `<button class="btn" id="nx">Next puzzle</button>`
+    : `<button class="btn ghost" id="keep">Keep mine</button><button class="btn" id="sw">Switch to AI’s</button>`}</div>`;
+  const fin = sw => { rec.switched = sw; rec.final = sw ? p.ai : rec.own; S.ai.push(rec); persist(); renderAI(); };
+  if (agree) document.getElementById("nx").onclick = () => fin(false);
+  else { document.getElementById("keep").onclick = () => fin(false); document.getElementById("sw").onclick = () => fin(true); }
+}
+
+function renderReflect(){
+  app.innerHTML = topBar() + `
+  <h2>One question</h2>
+  <p>What’s one thing you used to do yourself that you now always hand to AI?</p>
+  <textarea class="line" id="ref" aria-label="Your answer" placeholder="Be honest, nobody’s grading this">${esc(S.reflect)}</textarea>
+  <div class="actions"><button class="btn wide" id="go">Show my report</button></div>`;
+  const ref = document.getElementById("ref");
+  ref.oninput = () => S.reflect = ref.value.trim();
+  document.getElementById("go").onclick = () => { S.testing = false; next(); };
+}
+
+/* ---------- scoring ---------- */
+function relianceScore(){
+  const vals = S.likert.map((v,i) => LIKERT[i].r ? 6 - v : v);
+  return clamp((vals.reduce((a,b)=>a+b,0)/vals.length - 1) / 4 * 100);
+}
+// Word spread: mean pairwise cosine distance of the first 7 valid words (Olson et al., 2021),
+// using GloVe 50-d vectors. Rescaled so a one-theme list ≈ 0 and very varied lists ≈ 95–100.
+let VEC = null;
+const vecReady = (async () => {
+  try {
+    const [w, v] = await Promise.all([fetch("dat/words.txt").then(r => r.text()), fetch("dat/vectors.bin").then(r => r.arrayBuffer())]);
+    const words = w.split("\n"), arr = new Int8Array(v), index = new Map();
+    words.forEach((x,i) => index.set(x, i));
+    VEC = { index, arr, dim: arr.length / words.length };
+  } catch (e) { VEC = null; }
+})();
+function vecOf(i){ const d = VEC.dim, out = new Float32Array(d); let n = 0;
+  for (let k = 0; k < d; k++){ out[k] = VEC.arr[i*d+k]; n += out[k]*out[k]; } n = Math.sqrt(n); for (let k = 0; k < d; k++) out[k] /= n; return out; }
+async function datScore(){
+  await Promise.race([vecReady, new Promise(r => setTimeout(r, 8000))]);
+  const typed = S.dat.map(w => w.trim().toLowerCase()).filter(Boolean);
+  if (!VEC){
+    const n = new Set(typed.filter(w => /^[a-z]{3,}$/.test(w))).size;
+    return { score: clamp(Math.min(n,7) / 7 * 50), method:"basic", kept:[], dropped:[] };
+  }
+  const kept = [], dropped = [];
+  typed.forEach(w => {
+    const x = !VEC.index.has(w) && w.endsWith("s") && VEC.index.has(w.slice(0,-1)) ? w.slice(0,-1) : w;
+    if (!VEC.index.has(x)) dropped.push(w); else if (kept.length < 7 && !kept.includes(x)) kept.push(x);
+  });
+  if (kept.length < 2) return { score: 0, method:"vec", kept, dropped };
+  const vs = kept.map(w => vecOf(VEC.index.get(w)));
+  let sum = 0, pairs = 0;
+  for (let i = 0; i < vs.length; i++) for (let j = i+1; j < vs.length; j++){
+    let dot = 0; for (let k = 0; k < VEC.dim; k++) dot += vs[i][k]*vs[j][k]; sum += 1 - dot; pairs++; }
+  return { score: clamp((sum / pairs * 100 - 30) / 65 * 100 * Math.min(1, kept.length / 7)), method:"vec", kept, dropped };
+}
+function knowStats(){
+  let brier = 0, right = 0, overconf = 0;
+  S.know.forEach((k,i) => {
+    const ok = k.pick === KNOW[i].a ? 1 : 0, c = CONF.find(c => c.k === k.conf) || CONF[0];
+    right += ok; brier += (c.p - ok) ** 2; if (c.k === "sure" && !ok) overconf++;
+  });
+  brier /= KNOW.length;
+  return { score: clamp(100 * (1 - brier / 0.45)), right, overconf };
+}
+function aiBehaviour(){
+  const asks = S.ai.filter(r => r.asked).length;
+  const wrongAI = PUZ.map((p,i) => ({p, r:S.ai[i]})).filter(x => x.p.ai !== x.p.a);
+  const followed = wrongAI.filter(x => x.r && x.r.final === x.p.ai).length;
+  const droppedRight = S.ai.filter((r,i) => r.switched && r.own === PUZ[i].a).length;
+  const quickAsks = S.ai.filter(r => r.asked && r.askAt !== null && r.askAt <= 10).length;
+  const ownRight = S.ai.filter((r,i) => r.own === PUZ[i].a).length;
+  const points = S.ai.reduce((t,r,i) => t + (r.final === PUZ[i].a ? 2 : 0) - (r.asked ? 1 : 0), 0);
+  const did = clamp(asks / PUZ.length * 50 + followed / wrongAI.length * 50);
+  return {asks, followed, wrongCount: wrongAI.length, droppedRight, quickAsks, ownRight, points, did};
+}
+function profileOf(rel, think){
+  if (rel >= 50 && think >= 60) return {k:"power", name:"Power user", line:"You lean on AI a lot, and your own thinking is holding up. Keep AI as a tool, not a crutch."};
+  if (rel >= 50) return {k:"offloader", name:"Offloader", line:"You lean on AI often, and some thinking skills are lagging. Small habit changes will help quickly."};
+  if (think >= 60) return {k:"independent", name:"Independent thinker", line:"You think well on your own and use AI carefully. You can use it more boldly, as a sparring partner."};
+  return {k:"developing", name:"Still building", line:"You don’t lean on AI much, and some core skills need practice. Build the basics, then let AI speed you up."};
+}
+const SKILL_INFO = {
+  creativity:{label:"Creativity", what:"Coming up with ideas that are truly different."},
+  insight:{label:"Connecting ideas", what:"Seeing the link between things that look unrelated."},
+  reading:{label:"Deep reading", what:"Reading closely and drawing your own conclusions."},
+  focus:{label:"Focus and speed", what:"Holding information in mind and working fast without mistakes."},
+  selfaware:{label:"Knowing what you know", what:"Being sure when you’re right, and unsure when you might be wrong."},
+  reasoning:{label:"Reasoning on your own", what:"Solving tricky problems with your own head, before any AI help."}
+};
+const L = (url, text) => `<a href="${url}" target="_blank" rel="noopener">${text || url.replace(/^https?:\/\//,"").replace(/\/$/,"")}</a>`;
+
+// Every action: why (from this student's result), exact steps, where to go, how often, how to track.
+const ACTIONS = {
+  offloader:{ title:"Use the 10-minute rule before opening AI",
+    why: r => `You asked AI on ${r.b.asks} of 6 puzzles${r.b.quickAsks ? `, ${r.b.quickAsks} of them within 10 seconds` : ""}. Reaching for AI first skips the part of thinking that builds skill.`,
+    steps:[
+      "When you get any assignment, coding problem or doubt, start a 10-minute timer on your phone.",
+      "Work alone for those 10 minutes. Write down your attempt on paper or in your editor, even if it’s wrong or half done.",
+      "Only then open AI and paste this: “Here is my attempt. Point out my mistakes and give me a hint. Don’t give me the full answer.”",
+      "After AI helps, close it and redo the solution yourself from memory."],
+    where:[["Any AI tool you already use (ChatGPT, Gemini, Claude, Copilot)", ""], ["Phone clock app for the timer", ""]],
+    often:"Every assignment and every coding problem for the next 4 weeks.",
+    track:"Tick each day you used the rule. Aim for at least 5 days a week."},
+  power:{ title:"Make AI your reviewer, not your writer",
+    why: r => `You use AI a lot (${r.rel} out of 100) and your own thinking is holding up (${r.think}). Keep it that way by doing the first draft yourself.`,
+    steps:[
+      "Write your own answer or code first, before opening AI.",
+      "Then paste it into AI with: “Review my solution. Find bugs, edge cases and weak spots. Don’t rewrite it.”",
+      "Fix the problems yourself, by hand.",
+      "If you ever use code that AI wrote, explain it line by line out loud before you submit it. If you can’t explain a line, don’t submit it."],
+    where:[["Any AI tool you already use (ChatGPT, Gemini, Claude, Copilot)", ""]],
+    often:"Every assignment for the next 4 weeks.",
+    track:"Each week, count how many submissions were your own first draft. Aim for all of them."},
+  independent:{ title:"Use AI as a sparring partner",
+    why: r => `You think well on your own (${r.think} out of 100) and rely on AI less (${r.rel}). You can get more out of AI without losing that.`,
+    steps:[
+      "Solve a problem fully on your own first.",
+      "Then ask AI: “Here’s my solution. Show me a different approach and compare the trade-offs with mine.”",
+      "Or ask: “Argue against my answer. What would a strict reviewer say is wrong?”",
+      "Write one line on what you learned from the comparison."],
+    where:[["Any AI tool you already use (ChatGPT, Gemini, Claude, Copilot)", ""]],
+    often:"3 problems a week for the next 4 weeks.",
+    track:"Keep a list of the “one line” lessons. Aim for 12 by the end of week 4."},
+  developing:{ title:"Solve one problem a day without AI, then compare",
+    why: r => `Your own thinking score is ${r.think} out of 100. Daily practice on your own is the fastest way to raise it.`,
+    steps:[
+      "Every day, pick one easy problem from your NxtWave practice sets or from LeetCode (filter by Easy).",
+      "Give it 20 minutes with no AI and no Google. Write your attempt even if it fails.",
+      "Then ask AI: “How would you solve this? Explain it step by step.”",
+      "Compare with your attempt and write down one thing you’ll do differently next time."],
+    where:[["Your NxtWave practice sets", ""], ["LeetCode, Easy problems (free)", "https://leetcode.com/problemset/"]],
+    often:"20 minutes a day, 5 days a week, for 4 weeks.",
+    track:"Tick each day. Aim for 20 problems in 4 weeks."},
+  verify:{ title:"Check AI before you trust it",
+    why: r => `AI was confidently wrong on 3 puzzles, and you went with its wrong answer ${r.b.followed} time${r.b.followed===1?"":"s"}${r.b.droppedRight ? `, including giving up your own correct answer ${r.b.droppedRight} time${r.b.droppedRight===1?"":"s"}` : ""}.`,
+    steps:[
+      "For every AI answer you use, do one check before trusting it: run the code, test one edge case (empty input, zero, negative number), or find one other source.",
+      "When AI disagrees with you, don’t switch straight away. Ask it: “Show me why my answer is wrong, step by step.”",
+      "Ask AI: “How confident are you, and how can I verify this?” on any answer that matters.",
+      "Keep a tally of AI mistakes you catch on a sticky note or in your notes app."],
+    where:[["Any AI tool you already use", ""], ["Your own editor or terminal, to actually run the code", ""]],
+    often:"Every AI answer you use, for the next 4 weeks.",
+    track:"Write down how many AI mistakes you catch each week. If the number is zero, you probably aren’t checking hard enough."},
+  creativity:{ title:"Come up with ideas before AI does",
+    why: r => `Your creativity score is ${r.skills.creativity} out of 100. If AI always brainstorms for you, your own idea muscle gets weaker.`,
+    steps:[
+      "Every day, pick one ordinary object: a brick, a bucket, a spoon, a dupatta.",
+      "Set a 3-minute timer and list as many unusual uses as you can on paper.",
+      "Only after that, if you want, ask AI for its list and circle the ideas you didn’t think of.",
+      "Once a week, take the free Divergent Association Task (the same test as the Word spread round) and note your score."],
+    where:[["Divergent Association Task (free, 4 minutes)", "https://www.datcreativity.com/"], ["Pen and paper for the daily list", ""]],
+    often:"5 minutes a day, 5 days a week, plus the online test once a week.",
+    track:"Write the number of ideas each day. Aim to go from about 8 to 15 or more."},
+  insight:{ title:"Train yourself to connect distant ideas",
+    why: r => `You solved ${r.ratRight} of 5 Missing link puzzles. Linking far-apart ideas is how new solutions show up.`,
+    steps:[
+      "Open The Wiki Game. It gives you a start page and a target page on Wikipedia.",
+      "Get from start to target only by clicking links inside the articles. No search bar.",
+      "Before each click, say to yourself why that link should get you closer.",
+      "Play 3 rounds per session and note your clicks."],
+    where:[["The Wiki Game (free, no sign-up)", "https://www.thewikigame.com/"]],
+    often:"10 minutes, 4 days a week, for 4 weeks.",
+    track:"Note your average clicks per round each week. It should drop."},
+  reading:{ title:"Read long pieces without a summary",
+    why: r => `You got ${r.readRight} of 3 Deep read questions right. Letting AI summarise everything weakens close reading.`,
+    steps:[
+      "Twice a week, read one full editorial in The Hindu or one essay on Aeon. Phone on silent, no AI, no skipping.",
+      "Close it and write 3 lines from memory: the main claim, the best evidence, and one thing you disagree with.",
+      "Only then paste the article into AI, ask for a summary, and compare. Note what you missed.",
+      "Next time, read slower in the parts you missed."],
+    where:[["The Hindu editorials", "https://www.thehindu.com/opinion/editorial/"], ["Aeon essays (free)", "https://aeon.co/essays"]],
+    often:"15 minutes, twice a week, for 4 weeks.",
+    track:"Each time, count how many of your 3 lines match the AI summary. Aim for 3 out of 3."},
+  focus:{ title:"Build focus in short, phone-free blocks",
+    why: r => `Your focus and speed score is ${r.skills.focus} out of 100. Constant switching between apps makes it harder to hold things in mind.`,
+    steps:[
+      "Open BrainScale and choose CWM (Complex Working Memory) training. It’s free and needs no sign-up.",
+      "Play for 10 minutes. The game gets harder as you improve.",
+      "For study time, open Pomofocus: 25 minutes of study with your phone in another room, then a 5-minute break.",
+      "Do at least one 25-minute block every day."],
+    where:[["BrainScale CWM training (free)", "https://brainscale.net/app/brain-training/complex-working-memory/training"], ["Pomofocus timer (free)", "https://pomofocus.io/"]],
+    often:"BrainScale 10 minutes, 4 days a week. One 25-minute study block every day.",
+    track:"Watch your BrainScale level and streak, and count your 25-minute blocks each week."},
+  selfaware:{ title:"Learn when to double-check",
+    why: r => r.k.overconf ? `You were “sure” about ${r.k.overconf} answer${r.k.overconf>1?"s":""} that turned out wrong. People who are wrongly sure don’t check, and that’s exactly when AI mistakes slip through.`
+      : `Your score for knowing what you know is ${r.skills.selfaware} out of 100. Being unsure when you’re actually right also costs you time.`,
+    steps:[
+      "Make a free account on Clearer Thinking and open the tool called Calibrate Your Judgment.",
+      "Do one question set. For each answer, choose how confident you are.",
+      "In your class quizzes and coding tests, write your confidence (50%, 70% or 90%) next to each answer before you check it.",
+      "At the end of each week, look at your 90% answers: were about 9 out of 10 right?"],
+    where:[["Clearer Thinking (free account). On the site, open the tool “Calibrate Your Judgment”", "https://www.clearerthinking.org/"]],
+    often:"10 minutes, 3 times a week, for 4 weeks.",
+    track:"Count how often your “90% sure” answers were actually right."},
+  reasoning:{ title:"Spot bad arguments, including AI’s",
+    why: r => `You solved ${r.b.ownRight} of 6 puzzles on your own before seeing AI’s answer. Trick questions are where AI and people both go wrong.`,
+    steps:[
+      "Play Cranky Uncle. It teaches the 14 tricks used in misleading arguments. Finish one level per session.",
+      "Once a week, open Kialo, pick a debate on technology or education, and add one argument for and one against, in your own words.",
+      "When you read an AI answer, ask: which of the Cranky Uncle tricks could this be using?"],
+    where:[["Cranky Uncle, in your browser (free)", "https://app.crankyuncle.info/"], ["Cranky Uncle on Android or iPhone: search “Cranky Uncle” in your app store", ""], ["Kialo debates (free)", "https://www.kialo.com/"]],
+    often:"15 minutes, 3 times a week, for 4 weeks.",
+    track:"Note the levels you finish and the Kialo arguments you post."}
+};
+function gapLine(said, did){
+  if (did - said > 20) return "You lean on AI more than you think.";
+  if (said - did > 20) return "You’re harder on yourself than you need to be.";
+  return "You know yourself well.";
+}
+function gapDetail(said, did){
+  if (did - said > 20) return "Your answers in the confession round said one thing; your clicks said another.";
+  if (said - did > 20) return "You rely on AI less than you believe.";
+  return "How you describe your AI use matches what you actually did.";
+}
+
+/* ---------- report ---------- */
+async function renderReport(){
+  app.innerHTML = `<h1>Putting your report together…</h1><p class="soft">This takes a few seconds.</p>`;
+  const dat = await datScore();
+  const b = aiBehaviour(), k = knowStats();
+  const ratRight = S.rat.reduce((a,c)=>a+c,0), readRight = S.read.filter((v,i) => v === READ_Q[i].a).length;
+  const skills = {
+    creativity: dat.score,
+    insight: clamp(ratRight / RAT.length * 100),
+    reading: clamp(readRight / READ_Q.length * 100),
+    focus: clamp(Math.max(0, S.sd.correct - S.sd.wrong) / 40 * 100),
+    selfaware: k.score,
+    reasoning: clamp(b.ownRight / PUZ.length * 100)
+  };
+  const vals = Object.values(skills), think = clamp(vals.reduce((a,c)=>a+c,0) / vals.length);
+  const said = relianceScore(), rel = b.did;
+  const prof = profileOf(rel, think);
+  const ranked = Object.entries(skills).sort((x,y) => x[1]-y[1]);
+  const weakest = ranked[0][0], strongest = ranked[ranked.length-1][0];
+  const plan = [prof.k];
+  if (b.followed > 0 || b.droppedRight > 0) plan.push("verify");
+  ranked.forEach(([key]) => { if (plan.length < 3) plan.push(key); });
+  const R = { b, k, skills, rel, think, ratRight, readRight };
+  const today = new Date().toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric" });
+
+  const px = 40 + rel/100*300, py = 340 - think/100*300;
+  let grid = ""; for (let g = 40; g <= 340; g += 30) grid += `<line x1="${g}" y1="40" x2="${g}" y2="340"/><line x1="40" y1="${g}" x2="340" y2="${g}"/>`;
+  const lab = (x, y, key, txt, anchor) => `<text x="${x}" y="${y}" ${anchor?`text-anchor="${anchor}"`:""} ${prof.k===key?'fill="var(--pen)" font-weight="700"':""}>${txt}</text>`;
+  const quad = `<svg class="quad" viewBox="0 0 380 380" role="img" aria-label="Your position: reliance on AI ${rel}, own thinking ${think}">
+    <g stroke="var(--rule)" stroke-width="1">${grid}</g>
+    <line x1="190" y1="40" x2="190" y2="340" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <line x1="40" y1="160" x2="340" y2="160" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <g font-family="Kalam, cursive" font-size="17" fill="var(--ink-soft)">
+      ${lab(50,64,"independent","Independent thinker")}${lab(330,64,"power","Power user","end")}
+      ${lab(50,328,"developing","Still building")}${lab(330,328,"offloader","Offloader","end")}
+    </g>
+    <g font-family="Bricolage Grotesque, sans-serif" font-size="13" fill="var(--ink-soft)">
+      <text x="190" y="368" text-anchor="middle">relies on AI more →</text>
+      <text x="18" y="190" text-anchor="middle" transform="rotate(-90 18 190)">thinks better on own →</text>
+    </g>
+    <circle class="dot" cx="${px}" cy="${py}" r="12" fill="var(--pen)" stroke="var(--surface)" stroke-width="4"/>
+  </svg>`;
+
+  const facts = [
+    `You asked AI on ${b.asks} of ${PUZ.length} puzzles${b.quickAsks ? `, ${b.quickAsks} of them within 10 seconds` : ""}.`,
+    `AI was confidently wrong on ${b.wrongCount} puzzles. You went with its wrong answer on ${b.followed} of them.`,
+    k.overconf ? `You were “sure” about ${k.overconf} answer${k.overconf>1?"s":""} that turned out wrong.` : `Every time you said “sure”, you were right.`
+  ];
+  const meter = (label, v, cls, tag) => `<div class="meter-row"><div class="meter-top"><span>${label}${tag ? ` <em class="tag">${tag}</em>` : ""}</span><b>${v}</b></div>
+    <div class="meter ${cls||""}"><i style="width:0%" data-w="${v}"></i></div>`;
+  const weeks = `<div class="weeks" aria-label="Tick each week you did this">${[1,2,3,4].map(w => `<span><i></i>Week ${w}</span>`).join("")}</div>`;
+  const action = (key, n) => { const a = ACTIONS[key];
+    return `<section class="action">
+      <h4><span class="n">${n}</span>${a.title}</h4>
+      <p class="why"><b>Why you:</b> ${a.why(R)}</p>
+      <p class="lbl">What to do</p>
+      <ol class="steps">${a.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+      <p class="lbl">Where</p>
+      <ul class="where">${a.where.map(([t,u]) => `<li>${t}${u ? `: ${L(u)}` : ""}</li>`).join("")}</ul>
+      <div class="pair"><div><p class="lbl">How often</p><p>${a.often}</p></div><div><p class="lbl">How you’ll know it’s working</p><p>${a.track}</p></div></div>
+      ${weeks}
+    </section>`; };
+
+  document.title = `Thinking Profile - ${S.info.name}`;
+  app.innerHTML = `<div class="reveal report">
+  <div class="print-bar no-print"><button class="btn" id="pdf">Save as PDF or print</button></div>
+  <p class="for">Thinking profile of <b>${esc(S.info.name)}</b>, ${esc(S.info.roll)}, ${esc(S.info.campus)}<br>${today}</p>
+  <div class="profile">${prof.name}<svg viewBox="0 0 300 22" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C 60 4, 120 20, 180 10 S 270 6, 296 12"/></svg></div>
+  <p class="lead">${prof.line}</p>
+  ${S.tabs > 0 ? `<div class="warn">You left the test ${S.tabs} time${S.tabs>1?"s":""}. If you looked things up, these results show less about your own thinking.</div>` : ""}
+
+  <div class="snapshot">
+    <div class="quad-wrap">${quad}</div>
+    <div>
+      <div class="big"><div><b>${rel}</b><span>reliance on AI</span></div><div><b>${think}</b><span>own thinking</span></div></div>
+      <p class="verdict">${gapLine(said, rel)}</p>
+      <p class="soft small">${gapDetail(said, rel)} You rated yourself ${said} in the confession round; your actions scored ${rel}.</p>
+      <ul class="facts">${facts.map(f => `<li>${f}</li>`).join("")}</ul>
+    </div>
+  </div>
+
+  <h3>Your thinking skills <span class="soft small">(out of 100)</span></h3>
+  <div class="skills">${Object.entries(skills).map(([key,v]) => meter(SKILL_INFO[key].label, v, "", key===strongest ? "your strongest" : key===weakest ? "work on this first" : "")).join("")}</div>
+  ${dat.dropped.length ? `<p class="small soft">Word spread didn’t count: ${esc(dat.dropped.slice(0,5).join(", "))} (not a common English noun, or misspelt).</p>` : ""}
+
+  <h3 class="plan-h">Your 4-week plan</h3>
+  <p class="soft">Three things to do, picked from your results. Keep this page, tick a box at the end of each week you did it, and look at your report again after 4 weeks.</p>
+  ${plan.map((key,i) => action(key, i+1)).join("")}
+
+  <div class="no-print">
+    <h3>You or AI? The answers</h3>
+    <div>${PUZ.map((p,i) => { const r = S.ai[i] || {};
+      const what = r.asked ? "You asked AI" : r.own === null || r.own === undefined ? "No answer in time" : r.switched ? "You switched to AI’s answer" : "You kept your own answer";
+      const ok = r.final === p.a;
+      return `<details><summary><span class="mark ${ok?"hit":"miss"}">${ok ? "✓" : "✗"}</span><span>Puzzle ${i+1}: ${what}</span></summary>
+      <p>${p.q}</p><p><b>Correct: ${p.o[p.a]}.</b> AI said ${p.o[p.ai]}, which was ${p.ai === p.a ? "right" : "wrong"}. ${p.why}</p></details>`; }).join("")}</div>
+    <div class="actions"><button class="btn wide" id="pdf2">Save as PDF or print</button></div>
+    <p class="small soft">On a phone: tap the button, then choose “Save as PDF” (Android) or the share icon, then “Save to Files” (iPhone).</p>
+    <p class="saved" id="saved">Saving your result…</p>
+  </div>
+  <p class="print-only small soft">NIAT Thinking Profile. Scores reflect one 17-minute test and are a starting point, not a verdict.</p>
+  </div>`;
+  const doPrint = () => window.print();
+  document.getElementById("pdf").onclick = doPrint; document.getElementById("pdf2").onclick = doPrint;
+  requestAnimationFrame(() => requestAnimationFrame(() => app.querySelectorAll(".meter i").forEach(m => m.style.width = m.dataset.w + "%")));
+  window.onbeforeprint = () => app.querySelectorAll(".meter i").forEach(m => m.style.width = m.dataset.w + "%");
+
+  S.done = true; persist();
+  save({ minutes: Math.round((Date.now() - (S.startedAt || Date.now())) / 60000), name:S.info.name, roll:S.info.roll,
+    campus:S.info.campus.toUpperCase(), reliance:rel, said, thinking:think, skills,
+    dat:{kept:dat.kept, method:dat.method}, profile:prof.k,
+    ai:{asks:b.asks, quickAsks:b.quickAsks, followedWrong:b.followed, droppedRight:b.droppedRight},
+    know:{right:k.right, overconfident:k.overconf}, tabs:S.tabs, reflect:S.reflect.slice(0,500) });
+}
+
+async function save(row){
+  const el = document.getElementById("saved");
+  const ok = "Your result is saved. Open this link again any time to see your report.";
+  if (S.submitted){ el.textContent = ok; return; }
+  for (let attempt = 0; attempt < 4; attempt++){
+    try {
+      const r = await fetch("api/submit", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(row) });
+      if (r.ok){ S.submitted = true; persist(); el.textContent = ok; return; }
+    } catch (e) {}
+    el.textContent = "Saving your result… (retrying)";
+    await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+  }
+  el.innerHTML = `Your result didn’t save. Check your internet, then <a href="#" id="retry">save again</a>. Your report stays on this device.`;
+  document.getElementById("retry").onclick = e => { e.preventDefault(); save(row); };
+}
+
+render();
+</script>
+</body>
+</html>
