@@ -113,12 +113,42 @@ th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);whit
 th{font-family:var(--mono);font-size:.66rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);vertical-align:bottom;white-space:normal;min-width:88px;border-bottom:1px solid var(--ink)}
 td{font-family:var(--mono)}
 td:first-child{font-family:var(--sans);font-weight:600}
-tbody tr:last-child td{border-bottom:0;font-weight:700;background:var(--tint)}
+.summary tbody tr:last-child td{border-bottom:0;font-weight:700;background:var(--tint)}
+
+/* every student, one row each */
+.tools{display:flex;gap:12px 20px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 4px}
+.tools .field{margin:0;flex:1 1 260px;max-width:380px}
+.tools .line{font-size:1.05rem}
+.tools select.line{appearance:none;cursor:pointer;padding-right:22px;background:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%) calc(100% - 9px) 55%/5px 5px no-repeat,linear-gradient(135deg,var(--ink-2) 50%,transparent 50%) calc(100% - 4px) 55%/5px 5px no-repeat}
+.count{font-family:var(--mono);font-size:.75rem;color:var(--ink-2);margin:0 0 2px auto}
+.students{max-height:75vh;overflow:auto}
+.students thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
+.students th:first-child,.students td:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
+.students thead th:first-child{z-index:3}
+.students th button{all:unset;cursor:pointer;display:inline-flex;gap:4px;align-items:baseline}
+.students th button:focus-visible{outline:2px solid var(--you);outline-offset:3px}
+.students th[aria-sort] button{color:var(--ink)}
+.students th button i{font-style:normal;opacity:0;transition:opacity 160ms ease}
+.students th[aria-sort] button i{opacity:1}
+.who{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:600}
+.who:focus-visible{outline:2px solid var(--you);outline-offset:3px}
+.who::before{content:"";width:6px;height:6px;border-right:1.5px solid var(--ink-2);border-bottom:1.5px solid var(--ink-2);transform:rotate(-45deg);transition:transform 200ms var(--ease-out)}
+.who[aria-expanded="true"]::before{transform:rotate(45deg)}
+td.up{color:var(--ai);font-weight:600}
+td.warn-c{color:var(--bad);font-weight:600}
+.students tr.detail td{background:var(--tint);white-space:normal;font-family:var(--sans);font-weight:400;padding:16px 18px 18px}
+.facts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 28px;max-width:1100px;font-variant-numeric:normal}
+.facts-grid p{margin:0;font-size:.92rem}
+.facts-grid b{display:block;font-family:var(--mono);font-size:.66rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:3px}
+.empty{padding:22px 14px;color:var(--ink-2);font-family:var(--sans)}
+
 @media (hover:hover) and (pointer:fine){
   .btn:not(:disabled):hover .arr{transform:translateX(4px)}
   .btn:not(.ghost):not(:disabled):hover{background:color-mix(in srgb,var(--ink) 84%,var(--you))}
   .btn.ghost:not(:disabled):hover{background:var(--tint)}
-  tbody tr:hover td{background:var(--tint)}
+  tbody tr:not(.detail):hover td{background:var(--tint)}
+  .students th button:hover{color:var(--ink)}
+  .students th button:hover i{opacity:.5}
 }
 </style>
 </head>
@@ -166,13 +196,82 @@ function draw(total){
   app.innerHTML = `${BAR}<h1>Thinking Profile results</h1>
   <p class="soft">${ROWS.length} students${total > ROWS.length ? ` (${total - ROWS.length} retakes ignored; first attempt counts)` : ""}. Scores are averages out of 100.</p>
   <div class="actions" style="justify-content:flex-start"><button class="btn" id="csv">Download all students (CSV) <span class="arr" aria-hidden="true">↓</span></button><button class="btn ghost" id="ref">Refresh</button></div>
-  <div class="sheet table-wrap"><table>
+  <div class="sheet table-wrap"><table class="summary">
     <thead><tr><th>Group</th><th>Students</th><th>AI use (said)</th><th>AI use (did)</th><th>Followed wrong AI</th><th>Own thinking</th>
     <th>Creativity</th><th>Connecting</th><th>Deep reading</th><th>Focus</th><th>Knowing what you know</th><th>Reasoning</th><th>Sure but wrong</th>${Object.values(PROFILES).map(p => `<th>${p}</th>`).join("")}<th>Left the page</th><th>Avg minutes</th></tr></thead>
     <tbody>${Object.keys(groups).length > 1 ? Object.entries(groups).sort().map(([k,a]) => line(k,a)).join("") : ""}${line(Object.keys(groups).length > 1 ? "All campuses" : "All students", ROWS, true)}</tbody></table></div>
-  <p class="small soft">“Followed wrong AI” = students who ended on at least one of AI’s 3 wrong answers. “Sure but wrong” = students who said “sure” about at least one wrong answer. “Left the page” = students who switched tabs or apps during the test; treat their scores with caution.</p>`;
+  <p class="small soft">“Followed wrong AI” = students who ended on at least one of AI’s 3 wrong answers. “Sure but wrong” = students who said “sure” about at least one wrong answer. “Left the page” = students who switched tabs or apps during the test; treat their scores with caution.</p>
+
+  <h3>All students</h3>
+  <div class="tools">
+    <div class="field"><label for="q">Search name or roll number</label><input class="line" id="q" type="search" autocomplete="off" value="${esc(VIEW.q)}"></div>
+    ${Object.keys(groups).length > 1 ? `<div class="field" style="flex:0 1 200px"><label for="cf">Campus</label><select class="line" id="cf"><option value="">All campuses</option>${Object.keys(groups).sort().map(c => `<option${VIEW.campus === c ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></div>` : ""}
+    <p class="count" id="count" aria-live="polite"></p>
+  </div>
+  <div class="sheet table-wrap students" id="stu"></div>
+  <p class="small soft">Click a name for that student’s details. Click a column heading to sort. <span style="color:var(--ai);font-weight:600">Blue</span> AI use (did) = 20+ points above what they said. <span style="color:var(--bad);font-weight:600">Red</span> = left the page during the test.</p>`;
   document.getElementById("ref").onclick = load;
   document.getElementById("csv").onclick = csv;
+  document.getElementById("q").oninput = e => { VIEW.q = e.target.value; students(); };
+  const cf = document.getElementById("cf");
+  if (cf) cf.onchange = () => { VIEW.campus = cf.value; students(); };
+  students();
+}
+
+// Per-student table. Only the table body redraws on search or sort, so the search box keeps focus.
+const VIEW = { q:"", campus:"", sort:"at", dir:-1, open:new Set() };
+const idOf = r => `${r.campus}|${r.roll}`;
+const when = t => new Date(t).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+const SCOLS = [
+  ["roll", "Roll", r => r.roll], ["name", "Name", r => r.name], ["campus", "Campus", r => r.campus], ["profile", "Profile", r => PROFILES[r.profile] || r.profile],
+  ["said", "AI use (said)", r => r.said], ["reliance", "AI use (did)", r => r.reliance], ["thinking", "Own thinking", r => r.thinking],
+  ["creativity", "Creativity", r => r.skills?.creativity], ["insight", "Connecting", r => r.skills?.insight], ["reading", "Deep reading", r => r.skills?.reading],
+  ["focus", "Focus", r => r.skills?.focus], ["selfaware", "Knowing what you know", r => r.skills?.selfaware], ["reasoning", "Reasoning", r => r.skills?.reasoning],
+  ["sure", "Sure but wrong", r => r.know?.overconfident], ["tabs", "Left the page", r => r.tabs], ["minutes", "Minutes", r => r.minutes],
+  ["attempts", "Attempts", r => r.attempts], ["at", "Submitted", r => r.at]
+];
+function students(){
+  const multi = new Set(ROWS.map(r => r.campus)).size > 1;
+  const cols = SCOLS.filter(c => multi || c[0] !== "campus");
+  const q = VIEW.q.trim().toLowerCase();
+  const get = SCOLS.find(c => c[0] === VIEW.sort)[2];
+  const rows = ROWS.filter(r => (!VIEW.campus || r.campus === VIEW.campus) && (!q || `${r.name} ${r.roll}`.toLowerCase().includes(q)))
+    .sort((a, b) => { const x = get(a), y = get(b); return (typeof x === "number" && typeof y === "number" ? x - y : String(x ?? "").localeCompare(String(y ?? ""))) * VIEW.dir; });
+  document.getElementById("count").textContent = `${rows.length} of ${ROWS.length} students`;
+  const cell = (c, r) => {
+    const v = c[2](r);
+    if (c[0] === "name") return `<td><button class="who" aria-expanded="${VIEW.open.has(idOf(r))}" data-id="${esc(idOf(r))}">${esc(v)}</button></td>`;
+    if (c[0] === "at") return `<td>${when(v)}</td>`;
+    const cls = c[0] === "reliance" && r.reliance - r.said > 20 ? "up" : c[0] === "tabs" && r.tabs > 0 ? "warn-c" : "";
+    return `<td${cls ? ` class="${cls}"` : ""}>${esc(v ?? "")}</td>`;
+  };
+  const head = cols.map(c => `<th${VIEW.sort === c[0] ? ` aria-sort="${VIEW.dir > 0 ? "ascending" : "descending"}"` : ""}><button data-k="${c[0]}">${c[1]}<i aria-hidden="true">${VIEW.sort === c[0] && VIEW.dir > 0 ? "↑" : "↓"}</i></button></th>`).join("");
+  const body = rows.map(r => `<tr>${cols.map(c => cell(c, r)).join("")}</tr>${VIEW.open.has(idOf(r)) ? `<tr class="detail"><td colspan="${cols.length}">${detail(r)}</td></tr>` : ""}`).join("");
+  const stu = document.getElementById("stu");
+  stu.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td class="empty" colspan="${cols.length}">No students match.</td></tr>`}</tbody></table>`;
+  stu.querySelectorAll("th button").forEach(b => b.onclick = () => {
+    const k = b.dataset.k;
+    // Text columns start A→Z; score columns start highest first.
+    VIEW.dir = VIEW.sort === k ? -VIEW.dir : (["roll", "name", "campus", "profile"].includes(k) ? 1 : -1);
+    VIEW.sort = k; students();
+  });
+  stu.querySelectorAll(".who").forEach(b => b.onclick = () => {
+    VIEW.open.has(b.dataset.id) ? VIEW.open.delete(b.dataset.id) : VIEW.open.add(b.dataset.id);
+    students();
+    stu.querySelector(`.who[data-id="${CSS.escape(b.dataset.id)}"]`)?.focus();
+  });
+}
+function detail(r){
+  const ai = r.ai || {}, k = r.know || {}, n = (v, w) => `${v} ${w}${v === 1 ? "" : "s"}`;
+  const gap = r.reliance - r.said;
+  return `<div class="facts-grid">
+    <p><b>AI use</b>Said ${r.said}, did ${r.reliance}. ${gap > 20 ? "Leans on AI more than they think." : gap < -20 ? "Rates their AI use higher than it is." : "Their view of their AI use matches what they did."}</p>
+    <p><b>You or AI? round</b>Asked AI on ${ai.asks ?? 0} of 6 puzzles${ai.quickAsks ? `, ${ai.quickAsks} within 10 seconds` : ""}. Ended on AI’s wrong answer ${n(ai.followedWrong ?? 0, "time")} out of 3${ai.droppedRight ? `, and dropped their own right answer ${n(ai.droppedRight, "time")}` : ""}.</p>
+    <p><b>Know what you know</b>${k.right ?? 0} of 5 right. Said “sure” about ${n(k.overconfident ?? 0, "wrong answer")}.</p>
+    <p><b>Word spread words</b>${r.dat?.kept?.length ? esc(r.dat.kept.join(", ")) : "None counted."}${r.dat?.method === "basic" ? " (scored without word vectors)" : ""}</p>
+    <p><b>Their answer: what they now hand to AI</b>${r.reflect ? `“${esc(r.reflect)}”` : "Left blank."}</p>
+    <p><b>Session</b>${r.minutes} min. Left the page ${n(r.tabs, "time")}. ${(r.attempts || 1) > 1 ? `${r.attempts} attempts; scores shown are from the first.` : "1 attempt."} Submitted ${when(r.at)}.</p>
+  </div>`;
 }
 function csv(){
   const cols = [["roll",r=>r.roll],["name",r=>r.name],["profile",r=>PROFILES[r.profile]],["ai_use_said",r=>r.said],["ai_use_did",r=>r.reliance],
