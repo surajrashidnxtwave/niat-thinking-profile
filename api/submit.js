@@ -24,8 +24,9 @@ export default async function handler(req, res) {
   };
 
   try {
+    // Private: readable only through api/summary with the admin key, never by URL.
     await put(`results/${slug(row.campus)}/${slug(row.roll)}.json`, JSON.stringify(row), {
-      access: "public", addRandomSuffix: true, contentType: "application/json"
+      access: "private", addRandomSuffix: true, contentType: "application/json"
     });
     return res.status(200).json({ ok: true });
   } catch (e) {

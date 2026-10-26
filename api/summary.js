@@ -1,7 +1,13 @@
-import { list } from "@vercel/blob";
+import { list, get } from "@vercel/blob";
+
+const readJson = async url => {
+  const r = await get(url, { access: "private" });
+  return r?.statusCode === 200 ? new Response(r.stream).json() : null;
+};
 
 export default async function handler(req, res) {
-  const key = req.query.key || req.headers["x-admin-key"];
+  // Header only: a key in the URL would end up in request logs and browser history.
+  const key = req.headers["x-admin-key"];
   if (!process.env.ADMIN_KEY || key !== process.env.ADMIN_KEY) return res.status(401).json({ error: "wrong admin key" });
 
   try {
@@ -15,8 +21,7 @@ export default async function handler(req, res) {
 
     const rows = [];
     for (let i = 0; i < blobs.length; i += 25) {
-      const batch = await Promise.all(blobs.slice(i, i + 25).map(b =>
-        fetch(b.url).then(r => r.ok ? r.json() : null).catch(() => null)));
+      const batch = await Promise.all(blobs.slice(i, i + 25).map(b => readJson(b.url).catch(() => null)));
       rows.push(...batch.filter(Boolean));
     }
 
