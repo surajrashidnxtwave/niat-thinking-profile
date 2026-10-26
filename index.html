@@ -161,8 +161,6 @@ summary::-webkit-details-marker{display:none}
 summary .mark{font-family:var(--hand);font-size:1.3rem;line-height:1;width:1em;flex:none}
 details p{margin:8px 0 0 30px;font-size:.93rem}
 .saved{font-size:.9rem;color:var(--ink-soft);margin-top:26px}
-.feedback{background:#fff;border:1.5px solid var(--rule);border-radius:14px;overflow:hidden;margin:12px 0 8px}
-.feedback iframe{display:block;width:100%;height:85vh;min-height:560px;border:0}
 
 
 /* report layout */
@@ -233,7 +231,6 @@ details p{margin:8px 0 0 30px;font-size:.93rem}
 <script>
 /* ---------- config ---------- */
 const STORE_KEY = "niat-thinking-profile-v2";
-const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSfS0LUac8sQmdYkRM4nOgI8c3lffUXU1htOPEqUxF4BJuyVQA/viewform";
 
 /* ---------- content ---------- */
 const LIKERT = [
@@ -602,8 +599,8 @@ const L = (url, text) => `<a href="${url}" target="_blank" rel="noopener">${text
 
 // Every action: why (from this student's result), exact steps, where to go, how often, how to track.
 const ACTIONS = {
-  offloader:{ title:"Use the 10-minute rule before opening AI",
-    why: r => `You asked AI on ${r.b.asks} of 6 puzzles${r.b.quickAsks ? `, ${r.b.quickAsks} of them within 10 seconds` : ""}. Reaching for AI first skips the part of thinking that builds skill.`,
+  tenmin:{ title:"Use the 10-minute rule before opening AI",
+    why: r => `You asked AI on ${r.b.asks} of 6 puzzles${r.b.quickAsks ? `, ${r.b.quickAsks} of them within 10 seconds, before you’d really tried` : ""}. Reaching for AI first skips the part of thinking that builds skill.${r.gapNote}`,
     steps:[
       "When you get any assignment, coding problem or doubt, start a 10-minute timer on your phone.",
       "Work alone for those 10 minutes. Write down your attempt on paper or in your editor, even if it’s wrong or half done.",
@@ -613,7 +610,7 @@ const ACTIONS = {
     often:"Every assignment and every coding problem for the next 4 weeks.",
     track:"Tick each day you used the rule. Aim for at least 5 days a week."},
   power:{ title:"Make AI your reviewer, not your writer",
-    why: r => `You use AI a lot (${r.rel} out of 100) and your own thinking is holding up (${r.think}). Keep it that way by doing the first draft yourself.`,
+    why: r => `You use AI a lot (${r.rel} out of 100) and your own thinking is holding up (${r.think}). Keep it that way by doing the first draft yourself.${r.gapNote}`,
     steps:[
       "Write your own answer or code first, before opening AI.",
       "Then paste it into AI with: “Review my solution. Find bugs, edge cases and weak spots. Don’t rewrite it.”",
@@ -643,7 +640,12 @@ const ACTIONS = {
     often:"20 minutes a day, 5 days a week, for 4 weeks.",
     track:"Tick each day. Aim for 20 problems in 4 weeks."},
   verify:{ title:"Check AI before you trust it",
-    why: r => `AI was confidently wrong on 3 puzzles, and you went with its wrong answer ${r.b.followed} time${r.b.followed===1?"":"s"}${r.b.droppedRight ? `, including giving up your own correct answer ${r.b.droppedRight} time${r.b.droppedRight===1?"":"s"}` : ""}.`,
+    why: r => {
+      const n = r.b.followed, d = r.b.droppedRight;
+      const what = d ? `you ended up with its wrong answer ${n} time${n===1?"":"s"}${d === n ? (n===1 ? ", and you had the right answer before you switched" : ", and every time you had the right answer before you switched") : `, and ${d} of those times you had the right answer before you switched`}`
+        : `you went with its wrong answer ${n} time${n===1?"":"s"}`;
+      return `AI was confidently wrong on 3 of the 6 puzzles, and ${what}. Trusting AI over your own working is the habit to break.${r.gapNote}`;
+    },
     steps:[
       "For every AI answer you use, do one check before trusting it: run the code, test one edge case (empty input, zero, negative number), or find one other source.",
       "When AI disagrees with you, don’t switch straight away. Ask it: “Show me why my answer is wrong, step by step.”",
@@ -741,12 +743,24 @@ async function renderReport(){
   const vals = Object.values(skills), think = clamp(vals.reduce((a,c)=>a+c,0) / vals.length);
   const said = relianceScore(), rel = b.did;
   const prof = profileOf(rel, think);
+  if ((prof.k === "power" || prof.k === "offloader") && b.asks < 2)
+    prof.line = prof.k === "power" ? "You solve problems well on your own, but when AI disagrees with you, you tend to switch to its answer. Trust your own working more."
+      : "You rarely asked AI, but when it disagreed with you, you usually switched to its answer, even when it was wrong. That habit is costing you marks.";
   const ranked = Object.entries(skills).sort((x,y) => x[1]-y[1]);
   const weakest = ranked[0][0], strongest = ranked[ranked.length-1][0];
-  const plan = [prof.k];
-  if (b.followed > 0 || b.droppedRight > 0) plan.push("verify");
-  ranked.forEach(([key]) => { if (plan.length < 3) plan.push(key); });
-  const R = { b, k, skills, rel, think, ratRight, readRight };
+  const trusted = b.followed > 0 || b.droppedRight > 0;
+  let first;
+  if (b.asks >= 2) first = prof.k === "power" ? "power" : "tenmin";
+  else if (trusted) first = "verify";
+  else first = prof.k === "offloader" ? "developing" : prof.k;
+  const plan = [first];
+  if (trusted && first !== "verify") plan.push("verify");
+  ranked.forEach(([key]) => { if (plan.length < 3 && skills[key] < 80) plan.push(key); });
+  if (plan.length < 3 && !plan.includes(prof.k === "offloader" ? "developing" : prof.k)) plan.push(prof.k === "offloader" ? "developing" : prof.k);
+  ranked.forEach(([key]) => { if (plan.length < 3 && !plan.includes(key)) plan.push(key); });
+  const gapNote = rel - said > 20 ? ` In the confession round you rated your AI use ${said}; what you did scored ${rel}.` : "";
+  const R = { b, k, skills, rel, think, ratRight, readRight, gapNote };
+  const reflectStep = S.reflect ? `You wrote that you now hand this to AI: “${esc(S.reflect.slice(0,120))}${S.reflect.length > 120 ? "…" : ""}”. Do that one thing yourself, without AI, at least once a week.` : "";
   const today = new Date().toLocaleDateString("en-IN", { day:"numeric", month:"long", year:"numeric" });
 
   const px = 40 + rel/100*300, py = 340 - think/100*300;
@@ -775,12 +789,12 @@ async function renderReport(){
   const meter = (label, v, cls, tag) => `<div class="meter-row"><div class="meter-top"><span>${label}${tag ? ` <em class="tag">${tag}</em>` : ""}</span><b>${v}</b></div>
     <div class="meter ${cls||""}"><i style="width:0%" data-w="${v}"></i></div>`;
   const weeks = `<div class="weeks" aria-label="Tick each week you did this">${[1,2,3,4].map(w => `<span><i></i>Week ${w}</span>`).join("")}</div>`;
-  const action = (key, n) => { const a = ACTIONS[key];
+  const action = (key, n) => { const a = ACTIONS[key]; const steps = n === 1 && reflectStep ? [...a.steps, reflectStep] : a.steps; const RR = n === 1 ? R : {...R, gapNote:""};
     return `<section class="action">
       <h4><span class="n">${n}</span>${a.title}</h4>
-      <p class="why"><b>Why you:</b> ${a.why(R)}</p>
+      <p class="why"><b>Why you:</b> ${a.why(RR)}</p>
       <p class="lbl">What to do</p>
-      <ol class="steps">${a.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+      <ol class="steps">${steps.map(s => `<li>${s}</li>`).join("")}</ol>
       <p class="lbl">Where</p>
       <ul class="where">${a.where.map(([t,u]) => `<li>${t}${u ? `: ${L(u)}` : ""}</li>`).join("")}</ul>
       <div class="pair"><div><p class="lbl">How often</p><p>${a.often}</p></div><div><p class="lbl">How you’ll know it’s working</p><p>${a.track}</p></div></div>
@@ -810,7 +824,7 @@ async function renderReport(){
   ${dat.dropped.length ? `<p class="small soft">Word spread didn’t count: ${esc(dat.dropped.slice(0,5).join(", "))} (not a common English noun, or misspelt).</p>` : ""}
 
   <h3 class="plan-h">Your 4-week plan</h3>
-  <p class="soft">Three things to do, picked from your results. Keep this page, tick a box at the end of each week you did it, and look at your report again after 4 weeks.</p>
+  <p class="soft">Three things to do, picked from what you did in this test. Keep this page, tick a box at the end of each week you did it, and look at your report again after 4 weeks.</p>
   ${plan.map((key,i) => action(key, i+1)).join("")}
 
   <div class="no-print">
@@ -823,10 +837,6 @@ async function renderReport(){
     <div class="actions"><button class="btn wide" id="pdf2">Save as PDF or print</button></div>
     <p class="small soft">On a phone: tap the button, then choose “Save as PDF” (Android) or the share icon, then “Save to Files” (iPhone).</p>
     <p class="saved" id="saved">Saving your result…</p>
-    <h3>Tell us how it went</h3>
-    <p class="soft">About 5 minutes. Your answers help us make the test better.</p>
-    <div class="feedback"><iframe src="${FEEDBACK_FORM}?embedded=true" title="Feedback form" loading="lazy">Loading…</iframe></div>
-    <p class="small soft">Form not loading? <a href="${FEEDBACK_FORM}" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
   </div>
   <p class="print-only small soft">NIAT Thinking Profile. Scores reflect one 17-minute test and are a starting point, not a verdict.</p>
   </div>`;
